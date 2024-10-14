@@ -23,14 +23,14 @@
 
 ```html
 <van-collapse value="{{ activeNames }}" bind:change="onChange">
-  <van-collapse-item title="有赞微商城" name="1">
-    提供多样店铺模板，快速搭建网上商城
+  <van-collapse-item title="标题1" name="1">
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
-  <van-collapse-item title="有赞零售" name="2">
-    网店吸粉获客、会员分层营销、一机多种收款，告别经营低效和客户流失
+  <van-collapse-item title="标题2" name="2">
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
-  <van-collapse-item title="有赞美业" name="3" disabled>
-    线上拓客，随时预约，贴心顺手的开单收银
+  <van-collapse-item title="标题3" name="3" disabled>
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
 </van-collapse>
 ```
@@ -54,14 +54,14 @@ Page({
 
 ```html
 <van-collapse accordion value="{{ activeName }}" bind:change="onChange">
-  <van-collapse-item title="有赞微商城" name="1">
-    提供多样店铺模板，快速搭建网上商城
+  <van-collapse-item title="标题1" name="1">
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
-  <van-collapse-item title="有赞零售" name="2">
-    网店吸粉获客、会员分层营销、一机多种收款，告别经营低效和客户流失
+  <van-collapse-item title="标题2" name="2">
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
-  <van-collapse-item title="有赞美业" name="3">
-    线上拓客，随时预约，贴心顺手的开单收银
+  <van-collapse-item title="标题3" name="3">
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
 </van-collapse>
 ```
@@ -90,14 +90,14 @@ Page({
   bind:open="onOpen"
   bind:close="onClose"
 >
-  <van-collapse-item title="有赞微商城" name="1">
-    提供多样店铺模板，快速搭建网上商城
+  <van-collapse-item title="标题1" name="1">
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
-  <van-collapse-item title="有赞零售" name="2">
-    网店吸粉获客、会员分层营销、一机多种收款，告别经营低效和客户流失
+  <van-collapse-item title="标题2" name="2">
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
-  <van-collapse-item title="有赞美业" name="3">
-    线上拓客，随时预约，贴心顺手的开单收银
+  <van-collapse-item title="标题3" name="3">
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
 </van-collapse>
 ```
@@ -126,11 +126,11 @@ Page({
 ```html
 <van-collapse value="{{ activeNames }}" bind:change="onChange">
   <van-collapse-item name="1">
-    <view slot="title">有赞微商城<van-icon name="question-o" /></view>
-    提供多样店铺模板，快速搭建网上商城
+    <view slot="title">标题1<van-icon name="question-o" /></view>
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
-  <van-collapse-item title="有赞零售" name="2" icon="shop-o">
-    网店吸粉获客、会员分层营销、一机多种收款，告别经营低效和客户流失
+  <van-collapse-item title="标题2" name="2" icon="shop-o">
+    代码是写出来给人看的，附带能在机器上运行
   </van-collapse-item>
 </van-collapse>
 ```
@@ -152,33 +152,34 @@ Page({
 
 ### Collapse Props
 
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| --- | --- | --- | --- | --- |
-| value | 当前展开面板的 name | 非手风琴模式：_(string \| number)[]_<br>手风琴模式：_string \| number_ | - | - |
-| accordion | 是否开启手风琴模式 | _boolean_ | `false` | - |
-| border | 是否显示外边框 | _boolean_ | `true` | - |
+| 参数 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| value | 当前展开面板的 name | 非手风琴模式：_(string \| number)[]_<br>手风琴模式：_string \| number_ | - |
+| accordion | 是否开启手风琴模式 | _boolean_ | `false` |
+| border | 是否显示外边框 | _boolean_ | `true` |
 
 ### Collapse Event
 
-| 事件名 | 说明           | 参数                           |
-| ------ | -------------- | ------------------------------ |
-| change | 切换面板时触发 | activeNames: _string \| Array_ |
-| open | 展开面板时触发 | currentName: _string \| number_ |
-| close | 关闭面板时触发 | currentName: _string \| number_ |
+| 事件名 | 说明           | 参数                            |
+| ------ | -------------- | ------------------------------- |
+| change | 切换面板时触发 | activeNames: _string \| Array_  |
+| open   | 展开面板时触发 | currentName: _string \| number_ |
+| close  | 关闭面板时触发 | currentName: _string \| number_ |
 
 ### CollapseItem Props
 
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| --- | --- | --- | --- | --- |
-| name | 唯一标识符，默认为索引值 | _string \| number_ | `index` | - |
-| title | 标题栏左侧内容 | _string \| number_ | - | - |
-| icon | 标题栏左侧图标名称或图片链接，可选值见 [Icon 组件](#/icon) | _string_ | - | - |
-| value | 标题栏右侧内容 | _string \| number_ | - | - |
-| label | 标题栏描述信息 | _string_ | - | - |
-| border | 是否显示内边框 | _boolean_ | `true` | - |
-| is-link | 是否展示标题栏右侧箭头并开启点击反馈 | _boolean_ | `true` | - |
-| clickable | 是否开启点击反馈 | _boolean_ | `false` | - |
-| disabled | 是否禁用面板 | _boolean_ | `false` | - |
+| 参数 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| name | 唯一标识符，默认为索引值 | _string \| number_ | `index` |
+| title | 标题栏左侧内容 | _string \| number_ | - |
+| size | 标题栏大小，可选值为`large` | _string_ | - |
+| icon | 标题栏左侧图标名称或图片链接，可选值见 [Icon 组件](#/icon) | _string_ | - |
+| value | 标题栏右侧内容 | _string \| number_ | - |
+| label | 标题栏描述信息 | _string_ | - |
+| border | 是否显示内边框 | _boolean_ | `true` |
+| is-link | 是否展示标题栏右侧箭头并开启点击反馈 | _boolean_ | `true` |
+| clickable | 是否开启点击反馈 | _boolean_ | `false` |
+| disabled | 是否禁用面板 | _boolean_ | `false` |
 
 ### CollapseItem Slot
 
@@ -188,7 +189,7 @@ Page({
 | value      | 自定义显示内容                |
 | icon       | 自定义`icon`                  |
 | title      | 自定义`title`                 |
-| right-icon | 自定义右侧按钮，默认是`arrow` |
+| right-icon | 自定义右侧按钮，默认是`arrow`, 需要将 `is-link` 设置为 `false`, 才会生效  |
 
 ### Collapse 外部样式类
 

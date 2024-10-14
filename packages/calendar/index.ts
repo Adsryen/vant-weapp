@@ -1,7 +1,9 @@
 import { VantComponent } from '../common/component';
 import {
   ROW_HEIGHT,
+  getPrevDay,
   getNextDay,
+  getToday,
   compareDay,
   copyDates,
   calcDateNum,
@@ -10,9 +12,24 @@ import {
   getMonths,
   getDayByOffset,
 } from './utils';
+import { Day } from './components/month/index';
 
 import Toast from '../toast/toast';
 import { requestAnimationFrame } from '../common/utils';
+
+const initialMinDate = getToday().getTime();
+
+const initialMaxDate = (() => {
+  const now = getToday();
+  return new Date(
+    now.getFullYear(),
+    now.getMonth() + 6,
+    now.getDate()
+  ).getTime();
+})();
+
+const getTime = (date: Date | number) =>
+  date instanceof Date ? date.getTime() : date;
 
 VantComponent({
   props: {
@@ -35,6 +52,10 @@ VantComponent({
       type: String,
       value: '确定',
     },
+    confirmDisabledText: {
+      type: String,
+      value: '确定',
+    },
     rangePrompt: String,
     showRangePrompt: {
       type: Boolean,
@@ -42,29 +63,25 @@ VantComponent({
     },
     defaultDate: {
       type: null,
+      value: getToday().getTime(),
       observer(val) {
         this.setData({ currentDate: val });
         this.scrollIntoView();
       },
     },
     allowSameDay: Boolean,
-    confirmDisabledText: String,
     type: {
       type: String,
       value: 'single',
       observer: 'reset',
     },
     minDate: {
-      type: null,
-      value: Date.now(),
+      type: Number,
+      value: initialMinDate,
     },
     maxDate: {
-      type: null,
-      value: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth() + 6,
-        new Date().getDate()
-      ).getTime(),
+      type: Number,
+      value: initialMaxDate,
     },
     position: {
       type: String,
@@ -110,9 +127,18 @@ VantComponent({
       type: null,
       value: null,
     },
+    minRange: {
+      type: Number,
+      value: 1,
+    },
     firstDayOfWeek: {
       type: Number,
       value: 0,
+    },
+    readonly: Boolean,
+    rootPortal: {
+      type: Boolean,
+      value: false,
     },
   },
 
@@ -122,9 +148,18 @@ VantComponent({
     scrollIntoView: '',
   },
 
+  watch: {
+    minDate() {
+      this.initRect();
+    },
+    maxDate() {
+      this.initRect();
+    },
+  },
+
   created() {
     this.setData({
-      currentDate: this.getInitialDate(),
+      currentDate: this.getInitialDate(this.data.defaultDate),
     });
   },
 
@@ -137,7 +172,7 @@ VantComponent({
 
   methods: {
     reset() {
-      this.setData({ currentDate: this.getInitialDate() });
+      this.setData({ currentDate: this.getInitialDate(this.data.defaultDate) });
       this.scrollIntoView();
     },
 
@@ -162,34 +197,71 @@ VantComponent({
       });
     },
 
-    getInitialDate() {
-      const { type, defaultDate, minDate } = this.data;
+    limitDateRange(
+      date: number,
+      minDate: number | null = null,
+      maxDate: number | null = null
+    ) {
+      minDate = minDate || (this.data.minDate as number);
+      maxDate = maxDate || (this.data.maxDate as number);
+      if (compareDay(date, minDate) === -1) {
+        return minDate;
+      }
+      if (compareDay(date, maxDate) === 1) {
+        return maxDate;
+      }
+      return date;
+    },
+
+    getInitialDate(defaultDate: number | number[] | null = null) {
+      const { type, minDate, maxDate, allowSameDay } = this.data;
+
+      if (!defaultDate) return [];
+
+      const now = getToday().getTime();
 
       if (type === 'range') {
+        if (!Array.isArray(defaultDate)) {
+          defaultDate = [];
+        }
+
         const [startDay, endDay] = defaultDate || [];
-        return [
-          startDay || minDate,
-          endDay || getNextDay(new Date(minDate)).getTime(),
-        ];
+
+        const startDate = getTime(startDay || now);
+        const start = this.limitDateRange(
+          startDate,
+          minDate,
+          allowSameDay ? startDate : getPrevDay(new Date(maxDate)).getTime()
+        );
+
+        const date = getTime(endDay || now);
+        const end = this.limitDateRange(
+          date,
+          allowSameDay ? date : getNextDay(new Date(minDate)).getTime()
+        );
+
+        return [start, end];
       }
 
       if (type === 'multiple') {
-        return defaultDate || [minDate];
+        if (Array.isArray(defaultDate)) {
+          return defaultDate.map((date) => this.limitDateRange(date));
+        }
+
+        return [this.limitDateRange(now)];
       }
 
-      return defaultDate || minDate;
+      if (!defaultDate || Array.isArray(defaultDate)) {
+        defaultDate = now;
+      }
+      return this.limitDateRange(defaultDate);
     },
 
     scrollIntoView() {
       requestAnimationFrame(() => {
-        const {
-          currentDate,
-          type,
-          show,
-          poppable,
-          minDate,
-          maxDate,
-        } = this.data;
+        const { currentDate, type, show, poppable, minDate, maxDate } =
+          this.data;
+        if (!currentDate) return;
         // @ts-ignore
         const targetDate = type === 'single' ? currentDate : currentDate[0];
         const displayed = show || !poppable;
@@ -227,7 +299,11 @@ VantComponent({
     },
 
     onClickDay(event) {
-      const { date } = event.detail;
+      if (this.data.readonly) {
+        return;
+      }
+
+      let { date } = event.detail;
       const { type, currentDate, allowSameDay } = this.data;
 
       if (type === 'range') {
@@ -238,11 +314,22 @@ VantComponent({
           const compareToStart = compareDay(date, startDay);
 
           if (compareToStart === 1) {
+            const { days } = this.selectComponent('.month').data;
+            days.some((day: Day, index) => {
+              const isDisabled =
+                day.type === 'disabled' &&
+                getTime(startDay) < getTime(day.date) &&
+                getTime(day.date) < getTime(date);
+              if (isDisabled) {
+                ({ date } = days[index - 1]);
+              }
+              return isDisabled;
+            });
             this.select([startDay, date], true);
           } else if (compareToStart === -1) {
             this.select([date, null]);
           } else if (allowSameDay) {
-            this.select([date, date]);
+            this.select([date, date], true);
           }
         } else {
           this.select([date, null]);
@@ -306,9 +393,6 @@ VantComponent({
     },
 
     emit(date) {
-      const getTime = (date: Date | number) =>
-        date instanceof Date ? date.getTime() : date;
-
       this.setData({
         currentDate: Array.isArray(date) ? date.map(getTime) : getTime(date),
       });
@@ -321,7 +405,6 @@ VantComponent({
       if (maxRange && calcDateNum(date) > maxRange) {
         if (showRangePrompt) {
           Toast({
-            duration: 0,
             context: this,
             message: rangePrompt || `选择天数不能超过 ${maxRange} 天`,
           });
@@ -345,6 +428,10 @@ VantComponent({
         // @ts-ignore
         this.$emit('confirm', copyDates(this.data.currentDate));
       });
+    },
+
+    onClickSubtitle(event: WechatMiniprogram.TouchEvent) {
+      this.$emit('click-subtitle', event);
     },
   },
 });

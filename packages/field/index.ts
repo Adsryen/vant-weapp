@@ -1,6 +1,7 @@
 import { nextTick } from '../common/utils';
 import { VantComponent } from '../common/component';
 import { commonProps, inputProps, textareaProps } from './props';
+import { InputDetails } from './types';
 
 VantComponent({
   field: true,
@@ -37,6 +38,10 @@ VantComponent({
       type: Boolean,
       observer: 'setShowClear',
     },
+    clearTrigger: {
+      type: String,
+      value: 'focus',
+    },
     border: {
       type: Boolean,
       value: true,
@@ -44,6 +49,14 @@ VantComponent({
     titleWidth: {
       type: String,
       value: '6.2em',
+    },
+    clearIcon: {
+      type: String,
+      value: 'clear',
+    },
+    extraEventParams: {
+      type: Boolean,
+      value: false,
     },
   },
 
@@ -53,18 +66,49 @@ VantComponent({
     showClear: false,
   },
 
+  watch: {
+    value(this: WechatMiniprogram.Component.TrivialInstance, value) {
+      if (value !== this.value) {
+        this.setData({ innerValue: value });
+        this.value = value;
+
+        this.setShowClear();
+      }
+    },
+    clearTrigger() {
+      this.setShowClear();
+    },
+  },
+
   created() {
     this.value = this.data.value;
     this.setData({ innerValue: this.value });
   },
 
   methods: {
+    formatValue(value: string) {
+      const { maxlength } = this.data;
+
+      if (maxlength !== -1 && value.length > maxlength) {
+        return value.slice(0, maxlength);
+      }
+
+      return value;
+    },
+
     onInput(event: WechatMiniprogram.Input | WechatMiniprogram.TextareaInput) {
       const { value = '' } = event.detail || {};
 
-      this.value = value;
+      const formatValue = this.formatValue(value);
+
+      this.value = formatValue;
+
       this.setShowClear();
-      this.emitChange();
+
+      return this.emitChange({
+        ...event.detail,
+        value: formatValue,
+      });
     },
 
     onFocus(
@@ -97,7 +141,7 @@ VantComponent({
       this.setShowClear();
 
       nextTick(() => {
-        this.emitChange();
+        this.emitChange({ value: '' });
         this.$emit('clear', '');
       });
     },
@@ -111,7 +155,7 @@ VantComponent({
       this.$emit('confirm', value);
     },
 
-    setValue(value) {
+    setValue(value: string) {
       this.value = value;
       this.setShowClear();
 
@@ -119,7 +163,7 @@ VantComponent({
         this.setData({ innerValue: '' });
       }
 
-      this.emitChange();
+      this.emitChange({ value });
     },
 
     onLineChange(event: WechatMiniprogram.TextareaLineChange) {
@@ -134,22 +178,47 @@ VantComponent({
       this.$emit('keyboardheightchange', event.detail);
     },
 
-    emitChange() {
-      this.setData({ value: this.value });
+    onBindNicknameReview(event) {
+      this.$emit('nicknamereview', event.detail);
+    },
 
-      nextTick(() => {
-        this.$emit('input', this.value);
-        this.$emit('change', this.value);
-      });
+    emitChange(detail: InputDetails) {
+      const { extraEventParams } = this.data;
+
+      this.setData({ value: detail.value });
+
+      let result: InputDetails | undefined;
+
+      const data = extraEventParams
+        ? {
+            ...detail,
+            callback: (data: InputDetails) => {
+              result = data;
+            },
+          }
+        : detail.value;
+
+      this.$emit('input', data);
+      this.$emit('change', data);
+
+      return result;
     },
 
     setShowClear() {
-      const { clearable, readonly } = this.data;
+      const { clearable, readonly, clearTrigger } = this.data;
       const { focused, value } = this;
 
-      this.setData({
-        showClear: !!clearable && !!focused && !!value && !readonly,
-      });
+      let showClear = false;
+
+      if (clearable && !readonly) {
+        const hasValue = !!value;
+        const trigger =
+          clearTrigger === 'always' || (clearTrigger === 'focus' && focused);
+
+        showClear = hasValue && trigger;
+      }
+
+      this.setView({ showClear });
     },
 
     noop() {},

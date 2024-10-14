@@ -20,11 +20,11 @@
 
 ```html
 <van-swipe-cell right-width="{{ 65 }}" left-width="{{ 65 }}">
-  <view slot="left">选择</view>
+  <view slot="left" class="van-swipe-cell__left">选择</view>
   <van-cell-group>
     <van-cell title="单元格" value="内容" />
   </van-cell-group>
-  <view slot="right">删除</view>
+  <view slot="right" class="van-swipe-cell__right">删除</view>
 </van-swipe-cell>
 ```
 
@@ -113,13 +113,13 @@ Page({
 
 ### Props
 
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| --- | --- | --- | --- | --- |
-| name | 标识符，可以在 close 事件的参数中获取到 | _string \| number_ | - | - |
-| left-width | 左侧滑动区域宽度 | _number_ | `0` | - |
-| right-width | 右侧滑动区域宽度 | _number_ | `0` | - |
-| async-close | 是否异步关闭 | _boolean_ | `false` | - |
-| disabled | 是否禁用滑动 | _boolean_ | `false` | 1.3.4 |
+| 参数 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| name | 标识符，可以在 close 事件的参数中获取到 | _string \| number_ | - |
+| left-width | 左侧滑动区域宽度 | _number_ | `0` |
+| right-width | 右侧滑动区域宽度 | _number_ | `0` |
+| async-close | 是否异步关闭 | _boolean_ | `false` |
+| disabled `v1.3.4` | 是否禁用滑动 | _boolean_ | `false` |
 
 ### Slot
 
@@ -133,9 +133,9 @@ Page({
 
 | 事件名 | 说明 | 参数 |
 | --- | --- | --- |
-| click | 点击时触发 | 关闭时的点击位置 (`left` `right` `cell` `outside`) |
-| close | 关闭时触发 | { position: 'left' \| 'right' , instance , name: string } |
-| open | 打开时触发 | { position: 'left' \| 'right' , name: string } |
+| bind:click | 点击时触发 | 关闭时的点击位置 (`left` `right` `cell` `outside`) |
+| bind:close | 关闭时触发 | { position: 'left' \| 'right' , instance , name: string } |
+| bind:open | 打开时触发 | { position: 'left' \| 'right' , name: string } |
 
 ### close 参数
 
@@ -149,7 +149,7 @@ Page({
 
 通过 selectComponent 可以获取到 SwipeCell 实例并调用实例方法
 
-| 方法名 | 参数                     | 返回值 | 介绍             |
-| ------ | ------------------------ | ------ | ---------------- |
-| open   | position: `left | right` | -      | 打开单元格侧边栏 |
-| close  | -                        | -      | 收起单元格侧边栏 |
+| 方法名 | 参数                      | 返回值 | 介绍             |
+| ------ | ------------------------- | ------ | ---------------- |
+| open   | position: `left \| right` | -      | 打开单元格侧边栏 |
+| close  | -                         | -      | 收起单元格侧边栏 |

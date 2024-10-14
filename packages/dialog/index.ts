@@ -6,6 +6,7 @@ import type { Action } from './dialog';
 
 VantComponent({
   mixins: [button],
+  classes: ['cancle-button-class', 'confirm-button-class'],
 
   props: {
     show: {
@@ -20,14 +21,17 @@ VantComponent({
       type: String,
       value: 'default',
     },
-    useSlot: Boolean,
+    confirmButtonId: String,
     className: String,
     customStyle: String,
     asyncClose: Boolean,
     messageAlign: String,
     beforeClose: null,
     overlayStyle: String,
+    useSlot: Boolean,
     useTitleSlot: Boolean,
+    useConfirmButtonSlot: Boolean,
+    useCancelButtonSlot: Boolean,
     showCancelButton: Boolean,
     closeOnClickOverlay: Boolean,
     confirmButtonOpenType: String,
@@ -64,6 +68,10 @@ VantComponent({
       type: String,
       value: 'scale',
     },
+    rootPortal: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   data: {
@@ -71,7 +79,7 @@ VantComponent({
       confirm: false,
       cancel: false,
     },
-    callback: ((() => {}) as unknown) as (
+    callback: (() => {}) as unknown as (
       action: string,
       context: WechatMiniprogram.Component.TrivialInstance
     ) => void,
@@ -90,17 +98,22 @@ VantComponent({
       this.close('overlay');
     },
 
-    close(action) {
+    close(action: string) {
       this.setData({ show: false });
 
-      wx.nextTick(() => {
-        this.$emit('close', action);
+      this.closeAction = action;
+    },
 
-        const { callback } = this.data;
-        if (callback) {
-          callback(action, this);
-        }
-      });
+    onAfterLeave() {
+      const { closeAction: action } = this;
+
+      this.$emit('close', action);
+
+      const { callback } = this.data;
+
+      if (callback) {
+        callback(action, this);
+      }
     },
 
     stopLoading() {

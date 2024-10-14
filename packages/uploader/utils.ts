@@ -1,4 +1,4 @@
-import { pickExclude } from '../common/utils';
+import { pickExclude, isPC, isWxWork } from '../common/utils';
 import { isImageUrl, isVideoUrl } from '../common/validator';
 
 export interface File {
@@ -45,13 +45,15 @@ export function isVideoFile(item: File): boolean {
 }
 
 function formatImage(
-  res: WechatMiniprogram.ChooseImageSuccessCallbackResult
+  res:
+    | WechatMiniprogram.ChooseMediaSuccessCallbackResult
+    | WechatMiniprogram.ChooseImageSuccessCallbackResult
 ): File[] {
   return res.tempFiles.map((item) => ({
     ...pickExclude(item, ['path']),
     type: 'image',
-    url: item.path,
-    thumb: item.path,
+    url: item.tempFilePath || item.path,
+    thumb: item.tempFilePath || item.path,
   }));
 }
 
@@ -71,9 +73,10 @@ function formatVideo(
 function formatMedia(res: WechatMiniprogram.ChooseMediaSuccessCallbackResult) {
   return res.tempFiles.map((item) => ({
     ...pickExclude(item, ['fileType', 'thumbTempFilePath', 'tempFilePath']),
-    type: res.type,
+    type: item.fileType,
     url: item.tempFilePath,
-    thumb: res.type === 'video' ? item.thumbTempFilePath : item.tempFilePath,
+    thumb:
+      item.fileType === 'video' ? item.thumbTempFilePath : item.tempFilePath,
   }));
 }
 
@@ -95,21 +98,37 @@ export function chooseFile({
   sizeType,
   camera,
   maxCount,
+  mediaType,
+  extension,
 }) {
   return new Promise<File | File[]>((resolve, reject) => {
     switch (accept) {
       case 'image':
-        wx.chooseImage({
-          count: multiple ? Math.min(maxCount, 9) : 1,
-          sourceType: capture,
-          sizeType,
-          success: (res) => resolve(formatImage(res)),
-          fail: reject,
-        });
+        if (isPC || isWxWork) {
+          wx.chooseImage({
+            count: multiple ? Math.min(maxCount, 9) : 1,
+            sourceType: capture,
+            sizeType,
+            success: (res) => resolve(formatImage(res)),
+            fail: reject,
+          });
+        } else {
+          wx.chooseMedia({
+            count: multiple ? Math.min(maxCount, 9) : 1,
+            mediaType: ['image'],
+            sourceType: capture,
+            maxDuration,
+            sizeType,
+            camera,
+            success: (res) => resolve(formatImage(res)),
+            fail: reject,
+          });
+        }
         break;
       case 'media':
         wx.chooseMedia({
           count: multiple ? Math.min(maxCount, 9) : 1,
+          mediaType,
           sourceType: capture,
           maxDuration,
           sizeType,
@@ -132,6 +151,7 @@ export function chooseFile({
         wx.chooseMessageFile({
           count: multiple ? maxCount : 1,
           type: accept,
+          ...(extension ? { extension } : {}),
           success: (res) => resolve(formatFile(res)),
           fail: reject,
         });

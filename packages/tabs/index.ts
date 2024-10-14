@@ -15,7 +15,13 @@ type TrivialInstance = WechatMiniprogram.Component.TrivialInstance;
 VantComponent({
   mixins: [touch],
 
-  classes: ['nav-class', 'tab-class', 'tab-active-class', 'line-class'],
+  classes: [
+    'nav-class',
+    'tab-class',
+    'tab-active-class',
+    'line-class',
+    'wrap-class',
+  ],
 
   relation: useChildren('tab', function () {
     this.updateTabs();
@@ -49,10 +55,6 @@ VantComponent({
       type: null,
       value: 0,
       observer(name) {
-        if (!this.skipInit) {
-          this.skipInit = true;
-        }
-
         if (name !== this.getCurrentName()) {
           this.setCurrentIndexByName(name);
         }
@@ -91,6 +93,10 @@ VantComponent({
       type: Boolean,
       value: true,
     },
+    useBeforeChange: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   data: {
@@ -102,18 +108,18 @@ VantComponent({
     skipTransition: true,
     scrollWithAnimation: false,
     lineOffsetLeft: 0,
+    inited: false,
   },
 
   mounted() {
     requestAnimationFrame(() => {
+      this.swiping = true;
       this.setData({
         container: () => this.createSelectorQuery().select('.van-tabs'),
       });
 
-      if (!this.skipInit) {
-        this.resize();
-        this.scrollIntoView();
-      }
+      this.resize();
+      this.scrollIntoView();
     });
   },
 
@@ -132,17 +138,13 @@ VantComponent({
     trigger(eventName: string, child?: TrivialInstance) {
       const { currentIndex } = this.data;
 
-      const currentChild = child || this.children[currentIndex];
+      const data = this.getChildData(currentIndex, child);
 
-      if (!isDef(currentChild)) {
+      if (!isDef(data)) {
         return;
       }
 
-      this.$emit(eventName, {
-        index: currentChild.index,
-        name: currentChild.getComputedName(),
-        title: currentChild.data.title,
-      });
+      this.$emit(eventName, data);
     },
 
     onTap(event: WechatMiniprogram.TouchEvent) {
@@ -151,12 +153,15 @@ VantComponent({
 
       if (child.data.disabled) {
         this.trigger('disabled', child);
-      } else {
+        return;
+      }
+
+      this.onBeforeChange(index).then(() => {
         this.setCurrentIndex(index);
         nextTick(() => {
           this.trigger('click');
         });
-      }
+      });
     },
 
     // correct the index of active tab
@@ -192,6 +197,9 @@ VantComponent({
       });
 
       if (currentIndex === data.currentIndex) {
+        if (!data.inited) {
+          this.resize();
+        }
         return;
       }
 
@@ -243,12 +251,14 @@ VantComponent({
         lineOffsetLeft +=
           (rect.width - lineRect.width) / 2 + (ellipsis ? 0 : 8);
 
-        this.setData({ lineOffsetLeft });
+        this.setData({ lineOffsetLeft, inited: true });
+        this.swiping = true;
 
         if (skipTransition) {
-          nextTick(() => {
+          // waiting transition end
+          setTimeout(() => {
             this.setData({ skipTransition: false });
-          });
+          }, this.data.duration);
         }
       });
     },
@@ -288,19 +298,20 @@ VantComponent({
 
     onTouchStart(event: WechatMiniprogram.TouchEvent) {
       if (!this.data.swipeable) return;
+      this.swiping = true;
 
       this.touchStart(event);
     },
 
     onTouchMove(event: WechatMiniprogram.TouchEvent) {
-      if (!this.data.swipeable) return;
+      if (!this.data.swipeable || !this.swiping) return;
 
       this.touchMove(event);
     },
 
     // watch swipe touch end
     onTouchEnd() {
-      if (!this.data.swipeable) return;
+      if (!this.data.swipeable || !this.swiping) return;
 
       const { direction, deltaX, offsetX } = this;
       const minSwipeDistance = 50;
@@ -308,9 +319,11 @@ VantComponent({
       if (direction === 'horizontal' && offsetX >= minSwipeDistance) {
         const index = this.getAvaiableTab(deltaX);
         if (index !== -1) {
-          this.setCurrentIndex(index);
+          this.onBeforeChange(index).then(() => this.setCurrentIndex(index));
         }
       }
+
+      this.swiping = false;
     },
 
     getAvaiableTab(direction: number) {
@@ -335,6 +348,33 @@ VantComponent({
       }
 
       return -1;
+    },
+    onBeforeChange(index: number): Promise<void> {
+      const { useBeforeChange } = this.data;
+
+      if (!useBeforeChange) {
+        return Promise.resolve();
+      }
+
+      return new Promise((resolve, reject) => {
+        this.$emit('before-change', {
+          ...this.getChildData(index),
+          callback: (status) => (status ? resolve() : reject()),
+        });
+      });
+    },
+    getChildData(index: number, child?: TrivialInstance) {
+      const currentChild = child || this.children[index];
+
+      if (!isDef(currentChild)) {
+        return;
+      }
+
+      return {
+        index: currentChild.index,
+        name: currentChild.getComputedName(),
+        title: currentChild.data.title,
+      };
     },
   },
 });

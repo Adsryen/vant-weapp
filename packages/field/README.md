@@ -181,6 +181,37 @@ Page({
 </van-cell-group>
 ```
 
+### 替换输入框值
+
+在微信小程序中，bind:input 事件可以通过返回字符串或者一个对象来替换输入框的值以及调整光标的位置，在 vant-weapp 中，可以通过调用 change 或 input 参数中的 callback 函数，传入参数来实现
+
+```html
+<van-field
+  value="{{ value }}"
+  placeholder="请输入用户名"
+  border="{{ false }}"
+  clearable
+  extra-event-params
+  bind:change="onChange"
+/>
+```
+
+```js
+Page({
+  data: {
+    value: '',
+  },
+  onChange(e) {
+    const { value, callback } = e.detail;
+
+    callback({
+      value: value + 1,
+      cursor: 0,
+    });
+  },
+});
+```
+
 ## 常见问题
 
 ### 真机上为什么会出现聚焦时 placeholder 加粗、闪烁的现象？
@@ -209,17 +240,21 @@ Page({
 
 相关的讨论可以查看[微信开放社区](https://developers.weixin.qq.com/community/search?query=input%20%E6%89%8B%E5%86%99%E8%BE%93%E5%85%A5&page=1&block=1&random=1567079239098)。
 
+### 如何扩大点击区域？点击 label、错误信息 都能聚焦唤起键盘呢？
+
+升级至 1.10.21 版本及以上，配置 `name` 属性即可
+
 ## API
 
 ### Props
 
 | 参数 | 说明 | 类型 | 默认值 |
 | --- | --- | --- | --- |
-| name | 在表单内提交时的标识符 | _string_ | - |
+| name | 在表单内提交时的标识符。可以通过配置 `name` 来扩大点击区域 | _string_ | - |
 | label | 输入框左侧文本 | _string_ | - |
 | size | 单元格大小，可选值为 `large` | _string_ | - |
 | value | 当前输入的值 | _string \| number_ | - |
-| type | 可设置为任意原生类型, 如 `number` `idcard` `textarea` `digit` | _string_ | `text` |
+| type | 可设置为任意原生类型, 如 `number` `idcard` `textarea` `digit` `nickname` | _string_ | `text` |
 | fixed | 如果 type 为 `textarea` 且在一个 `position:fixed` 的区域，需要显示指定属性 fixed 为 true | _boolean_ | `false` |
 | focus | 获取焦点 | _boolean_ | `false` |
 | border | 是否显示内边框 | _boolean_ | `true` |
@@ -256,13 +291,16 @@ Page({
 | auto-focus | 自动聚焦，拉起键盘 | _boolean_ | `false` |
 | disable-default-padding | 是否去掉 iOS 下的默认内边距，只对 textarea 有效 | _boolean_ | `true` |
 | cursor | 指定 focus 时的光标位置 | _number_ | `-1` |
+| clear-trigger `v1.8.4` | 显示清除图标的时机，`always` 表示输入框不为空时展示，<br>`focus` 表示输入框聚焦且不为空时展示 | _string_ | `focus` |
+| always-embed `v1.9.2` | 强制 input 处于同层状态，默认 focus 时 input 会切到非同层状态 (仅在 iOS 下生效) | _boolean_ | `false` |
+| extra-event-params `v1.10.12` | 开启事件增强模式，会在 input 和 change 事件额外提供 `cursor` 和 `keyCode` 参数，计划在下一个大版本作为默认行为 | _boolean_ | `false` |
 
 ### Events
 
 | 事件 | 说明 | 回调参数 |
 | --- | --- | --- |
-| bind:input | 输入内容时触发 | event.detail: 当前输入值 |
-| bind:change | 输入内容时触发 | event.detail: 当前输入值 |
+| bind:input | 输入内容时触发 | event.detail: 当前输入值; 在 extra-event-params 为 `true` 时为 [InputDetail](#/field#inputdetail) |
+| bind:change | 输入内容时触发 | event.detail: 当前输入值; 在 extra-event-params 为 `true` 时为 [InputDetail](#/field#inputdetail) |
 | bind:confirm | 点击完成按钮时触发 | event.detail: 当前输入值 |
 | bind:click-icon | 点击尾部图标时触发 | - |
 | bind:focus | 输入框聚焦时触发 | event.detail.value: 当前输入值; <br>event.detail.height: 键盘高度 |
@@ -271,6 +309,16 @@ Page({
 | bind:click-input | 点击输入区域时触发 | - |
 | bind:linechange | 输入框行数变化时调用，只对 textarea 有效 | event.detail = { height: 0, heightRpx: 0, lineCount: 0 } |
 | bind:keyboardheightchange | 键盘高度发生变化的时候触发此事件 | event.detail = { height: height, duration: duration } |
+| bind:nicknamereview `v1.11.5` | 用户昵称审核完毕后触发，仅在 type 为 "nickname" 时有效 | event.detail = { pass, timeout } |
+
+### InputDetail
+
+| 参数 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| value | 当前输入值 | _string_ | - |
+| cursor | 光标位置 | _number_ | - |
+| keyCode | 键值 | _number_ | - |
+| callback | 调用该函数传 `{ value: string, cursor: number }` 来替换输入框的内容，具体用法可以参考 [wx-input](https://developers.weixin.qq.com/miniprogram/dev/component/input.html) | _function_ | - |
 
 ### Slot
 
@@ -284,8 +332,9 @@ Page({
 
 ### 外部样式类
 
-| 类名             | 说明           |
-| ---------------- | -------------- |
-| label-class      | 左侧文本样式类 |
-| input-class      | 输入框样式类   |
-| right-icon-class | 右侧图标样式类 |
+| 类名                    | 说明           |
+| ----------------------- | -------------- |
+| custom-class `v1.10.21` | 根节点样式类   |
+| label-class             | 左侧文本样式类 |
+| input-class             | 输入框样式类   |
+| right-icon-class        | 右侧图标样式类 |

@@ -1,7 +1,7 @@
 import { VantComponent } from '../common/component';
-import { isImageFile, chooseFile, isVideoFile, File } from './utils';
-import { chooseImageProps, chooseVideoProps } from './shared';
 import { isBoolean, isPromise } from '../common/validator';
+import { imageProps, mediaProps, messageFileProps, videoProps } from './shared';
+import { chooseFile, File, isImageFile, isVideoFile } from './utils';
 
 VantComponent({
   props: {
@@ -52,6 +52,10 @@ VantComponent({
       type: Boolean,
       value: true,
     },
+    videoFit: {
+      type: String,
+      value: 'contain',
+    },
     imageFit: {
       type: String,
       value: 'scaleToFill',
@@ -60,8 +64,10 @@ VantComponent({
       type: String,
       value: 'photograph',
     },
-    ...chooseImageProps,
-    ...chooseVideoProps,
+    ...imageProps,
+    ...videoProps,
+    ...mediaProps,
+    ...messageFileProps,
   },
 
   data: {
@@ -168,12 +174,13 @@ VantComponent({
       if (!this.data.previewFullImage) return;
 
       const { index } = event.currentTarget.dataset;
-      const { lists } = this.data;
+      const { lists, showmenu } = this.data;
       const item = lists[index];
 
       wx.previewImage({
         urls: lists.filter((item) => isImageFile(item)).map((item) => item.url),
         current: item.url,
+        showmenu,
         fail() {
           wx.showToast({ title: '预览图片失败', icon: 'none' });
         },
@@ -185,14 +192,25 @@ VantComponent({
       const { index } = event.currentTarget.dataset;
       const { lists } = this.data as { lists: File[] };
 
+      const sources: WechatMiniprogram.MediaSource[] = [];
+
+      const current = lists.reduce((sum, cur, curIndex) => {
+        if (!isVideoFile(cur)) {
+          return sum;
+        }
+
+        sources.push({ ...cur, type: 'video' });
+
+        if (curIndex < index) {
+          sum++;
+        }
+
+        return sum;
+      }, 0);
+
       wx.previewMedia({
-        sources: lists
-          .filter((item) => isVideoFile(item))
-          .map((item) => ({
-            ...item,
-            type: 'video',
-          })),
-        current: index,
+        sources,
+        current,
         fail() {
           wx.showToast({ title: '预览视频失败', icon: 'none' });
         },
@@ -200,6 +218,8 @@ VantComponent({
     },
 
     onPreviewFile(event: WechatMiniprogram.TouchEvent) {
+      if (!this.data.previewFile) return;
+
       const { index } = event.currentTarget.dataset;
 
       wx.openDocument({

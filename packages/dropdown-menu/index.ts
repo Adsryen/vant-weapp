@@ -6,6 +6,7 @@ let ARRAY: WechatMiniprogram.Component.TrivialInstance[] = [];
 
 VantComponent({
   field: true,
+  classes: ['title-class'],
 
   relation: useChildren('dropdown-item', function () {
     this.updateItemListData();
@@ -34,6 +35,10 @@ VantComponent({
       type: String,
       value: 'down',
       observer: 'updateChildrenData',
+    },
+    safeAreaTabBar: {
+      type: Boolean,
+      value: false,
     },
     closeOnClickOverlay: {
       type: Boolean,

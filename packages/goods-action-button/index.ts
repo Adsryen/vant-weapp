@@ -11,12 +11,20 @@ VantComponent({
   props: {
     text: String,
     color: String,
+    size: {
+      type: String,
+      value: 'normal',
+    },
     loading: Boolean,
     disabled: Boolean,
     plain: Boolean,
     type: {
       type: String,
       value: 'danger',
+    },
+    customStyle: {
+      type: String,
+      value: '',
     },
   },
 

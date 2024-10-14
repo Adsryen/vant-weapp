@@ -4,7 +4,10 @@ on:
   push:
     branches: [dev]
     paths:
-      - 'docs/**'
+      - 'docs/**/*.md'
+      - 'packages/**/*.md'
+
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -21,9 +24,16 @@ jobs:
       - name: Build Site
         run: npx --no-install vant-cli build-site
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.1
+      - name: Deploy for GitHub 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.6.0
         with:
           branch: gh-pages
-          folder: site
-          clean-exclude: 0.x
+          folder: site-dist
+          token: ${{ secrets.VANT_UI_TOKEN }}
+          repository-name: vant-ui/vant-ui.github.io
+          target-folder: vant-weapp
+          # enable single-commit to reduce the repo size
+          single-commit: true
+          clean: true
+          clean-exclude: |
+            0.x

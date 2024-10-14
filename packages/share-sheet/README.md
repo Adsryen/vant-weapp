@@ -159,6 +159,7 @@ Page({
 
 | 参数 | 说明 | 类型 | 默认值 |
 | --- | --- | --- | --- |
+| show | 是否显示分享面板 | _boolean_ | `false` |
 | options | 分享选项 | _Option[]_ | `[]` |
 | title | 顶部标题 | _string_ | - |
 | cancel-text | 取消按钮文字 | _string_ | `'取消'` |
@@ -167,6 +168,7 @@ Page({
 | overlay | 是否显示遮罩层 | _boolean_ | `true` |
 | close-on-click-overlay | 是否在点击遮罩层后关闭 | _boolean_ | `true` |
 | safe-area-inset-bottom | 是否开启底部安全区适配 | _boolean_ | `true` |
+| root-portal `v1.11.3` | 是否从页面子树中脱离出来，用于解决各种 fixed 失效问题，微信基础库 >= `2.25.2 `  | _boolean_ | `false` |
 
 ### Option 数据结构
 
@@ -183,10 +185,10 @@ Page({
 
 | 事件名        | 说明               | 回调参数                        |
 | ------------- | ------------------ | ------------------------------- |
-| select        | 点击分享选项时触发 | _option: Option, index: number_ |
-| close         | 关闭时触发         | -                               |
-| cancel        | 点击取消按钮时触发 | -                               |
-| click-overlay | 点击遮罩层时触发   | -                               |
+| bind:select        | 点击分享选项时触发 | _option: Option, index: number_ |
+| bind:close         | 关闭时触发         | -                               |
+| bind:cancel        | 点击取消按钮时触发 | -                               |
+| bind:click-overlay | 点击遮罩层时触发   | -                               |
 
 ### Slots
 

@@ -185,28 +185,47 @@ Page({
 </van-popup>
 ```
 
-## 常见问题
+### 异步切换
 
-### 组件从隐藏状态切换到显示状态时，底部条位置错误？
-
-Tabs 组件在挂载时，会获取自身的宽度，并计算出底部条的位置。如果组件一开始处于隐藏状态，则获取到的宽度永远为 0，因此无法展示底部条位置。
-
-#### 解决方法
-
-方法一，使用 `wx:if` 来控制组件展示，使组件重新初始化。
+通过 `before-change` 事件可以在切换标签前执行特定的逻辑，实现切换前校验、异步切换的目的
 
 ```html
-<van-tabs wx:if="show" />
-```
-
-方法二，调用组件的 resize 方法来主动触发重绘。
-
-```html
-<van-tabs id="tabs" />
+<van-tabs active="{{ active }}" use-before-change="{{ true }}" bind:change="onChange" bind:before-change="onBeforeChange" >
+  <van-tab title="标签 1">内容 1</van-tab>
+  <van-tab title="标签 2">内容 2</van-tab>
+  <van-tab title="标签 3">内容 3</van-tab>
+  <van-tab title="标签 4">内容 4</van-tab>
+</van-tabs>
 ```
 
 ```js
-this.selectComponent('#tabs').resize();
+Page({
+  data: {
+    active: 1,
+  },
+
+  onChange(event) {
+    wx.showToast({
+      title: `切换到标签 ${event.detail.name}`,
+      icon: 'none',
+    });
+  },
+  onBeforeChange(event) {
+    const { callback, title } = event.detail;
+    
+    wx.showModal({
+      title: '异步切换',
+      content: `确定要切换至 ${title} tab吗？`,
+      success: (res) => {
+        if (res.confirm) {
+          callback(true)
+        } else if (res.cancel) {
+          callback(false)
+        }
+      },
+    })
+  }
+});
 ```
 
 ## API
@@ -232,6 +251,7 @@ this.selectComponent('#tabs').resize();
 | title-active-color | 标题选中态颜色 | _string_ | - |
 | title-inactive-color | 标题默认态颜色 | _string_ | - |
 | z-index | z-index 层级 | _number_ | `1` |
+| use-before-change `v1.10.10` | 是否开启切换前校验 | _boolean_ | `false` |
 
 ### Tab Props
 
@@ -262,18 +282,20 @@ this.selectComponent('#tabs').resize();
 | 事件名 | 说明 | 参数 |
 | --- | --- | --- |
 | bind:click | 点击标签时触发 | name：标签标识符，title：标题 |
+| bind:before-change `v1.10.10` | tab 切换前会触发，在回调函数中返回 `false` 可终止 tab 切换，绑定事件的同时需要将`use-before-change`属性设置为`true` | `event.detail.name`: 当前切换的 tab 标识符， `event.detail.title`: 当前切换的 tab 标题， `event.detail.index`: 当前切换的 tab 下标，`event.detail.callback`: 回调函数，调用`callback(false)`终止 tab 切换 |
 | bind:change | 当前激活的标签改变时触发 | name：标签标识符，title：标题 |
 | bind:disabled | 点击被禁用的标签时触发 | name：标签标识符，title：标题 |
 | bind:scroll | 滚动时触发 | { scrollTop: 距离顶部位置, isFixed: 是否吸顶 } |
 
 ### 外部样式类
 
-| 类名             | 说明             |
-| ---------------- | ---------------- |
-| custom-class     | 根节点样式类     |
-| nav-class        | 标签栏样式类     |
-| tab-class        | 标签样式类       |
-| tab-active-class | 标签激活态样式类 |
+| 类名             | 说明               |
+| ---------------- | ------------------ |
+| custom-class     | 根节点样式类       |
+| nav-class        | 标签栏样式类       |
+| tab-class        | 标签样式类         |
+| tab-active-class | 标签激活态样式类   |
+| wrap-class       | 标签栏根节点样式类 |
 
 ### 方法
 
@@ -282,3 +304,27 @@ this.selectComponent('#tabs').resize();
 | 方法名 | 参数 | 返回值 | 介绍 |
 | --- | --- | --- | --- |
 | resize | - | - | 外层元素大小或组件显示状态变化时，可以调用此方法来触发重绘 |
+
+## 常见问题
+
+### 组件从隐藏状态切换到显示状态时，底部条位置错误？
+
+Tabs 组件在挂载时，会获取自身的宽度，并计算出底部条的位置。如果组件一开始处于隐藏状态，则获取到的宽度永远为 0，因此无法展示底部条位置。
+
+#### 解决方法
+
+方法一，使用 `wx:if` 来控制组件展示，使组件重新初始化。
+
+```html
+<van-tabs wx:if="show" />
+```
+
+方法二，调用组件的 resize 方法来主动触发重绘。
+
+```html
+<van-tabs id="tabs" />
+```
+
+```js
+this.selectComponent('#tabs').resize();
+```

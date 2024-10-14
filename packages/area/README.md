@@ -52,7 +52,7 @@ const areaList = {
 
 ### @vant/area-data
 
-Vant 官方提供了一份默认的省市区数据，可以通过 [@vant/area-data](https://github.com/youzan/vant/tree/dev/packages/vant-area-data) 引入。
+Vant 官方提供了一份默认的省市区数据，可以通过 [@vant/area-data](https://github.com/vant-ui/vant/tree/dev/packages/vant-area-data) 引入。
 
 ```bash
 yarn add @vant/area-data
@@ -126,18 +126,19 @@ db.collection('region')
 
 ### Props
 
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| --- | --- | --- | --- | --- |
-| value | 当前选中的省市区`code` | _string_ | - | - |
-| title | 顶部栏标题 | _string_ | - | - |
-| area-list | 省市区数据，格式见下方 | _object_ | - | - |
-| columns-num | 省市区显示列数，3-省市区，2-省市，1-省 | _string \| number_ | `3` | - |
-| columns-placeholder | 列占位提示文字 | _string[]_ | `[]` | - |
-| loading | 是否显示加载状态 | _boolean_ | `false` | - |
-| item-height | 选项高度 | _number_ | `44` | - |
-| visible-item-count | 可见的选项个数 | _number_ | `6` | - |
-| confirm-button-text | 确认按钮文字 | _string_ | `确认` | - |
-| cancel-button-text | 取消按钮文字 | _string_ | `取消` | - |
+| 参数 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| value | 当前选中的省市区`code` | _string_ | - |
+| title | 顶部栏标题 | _string_ | - |
+| area-list | 省市区数据，格式见下方 | _object_ | - |
+| columns-num | 省市区显示列数，3-省市区，2-省市，1-省 | _number_ | `3` |
+| columns-placeholder | 列占位提示文字 | _string[]_ | `[]` |
+| loading | 是否显示加载状态 | _boolean_ | `false` |
+| item-height | 选项高度 | _number_ | `44` |
+| visible-item-count | 可见的选项个数 | _number_ | `6` |
+| confirm-button-text | 确认按钮文字 | _string_ | `确认` |
+| cancel-button-text | 取消按钮文字 | _string_ | `取消` |
+| show-toolbar `1.10.3` | 是否显示顶部栏 | _boolean_ | `true` |
 
 ### Events
 
@@ -157,7 +158,7 @@ db.collection('region')
 
 ### 点击完成时返回的数据格式
 
-返回的数据整体为一个 Object，包含 `values`, `indexs` 两个 key。
+返回的数据整体为一个 Object，包含 `values`, `index` 两个 key。
 
 `values` 整体为一个数组，数组内包含 `columnsNum` 个数据， 每个数据对应一列选项中被选中的数据。
 
@@ -180,4 +181,4 @@ db.collection('region')
 ];
 ```
 
-`indexs` 为一个数组，数组内包含 `columnsNum` 个数据， 每个数据对应一列选项中被选中项的序号。
+`index` 为一个数组，数组内包含 `columnsNum` 个数据， 每个数据对应一列选项中被选中项的序号。

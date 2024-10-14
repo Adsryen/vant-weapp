@@ -78,7 +78,7 @@ Page({
 ```
 
 ```js
-import Notify from '@vant/weapp/dist/notify/notify';
+import Notify from '@vant/weapp/notify/notify';
 
 Page({
   data: {
@@ -95,9 +95,9 @@ Page({
 
 ### Sidebar Props
 
-| 参数      | 说明         | 类型               | 默认值 | 版本 |
-| --------- | ------------ | ------------------ | ------ | ---- |
-| activeKey | 选中项的索引 | _string \| number_ | `0`    | -    |
+| 参数      | 说明         | 类型               | 默认值 |
+| --------- | ------------ | ------------------ | ------ |
+| activeKey | 选中项的索引 | _string \| number_ | `0`    |
 
 ### Sidebar Event
 

@@ -1,6 +1,10 @@
 let queue: WechatMiniprogram.Component.TrivialInstance[] = [];
 export type Action = 'confirm' | 'cancel' | 'overlay';
 
+type DialogContext =
+  | WechatMiniprogram.Page.TrivialInstance
+  | WechatMiniprogram.Component.TrivialInstance;
+
 interface DialogOptions {
   lang?: string;
   show?: boolean;
@@ -8,13 +12,14 @@ interface DialogOptions {
   width?: string | number | null;
   zIndex?: number;
   theme?: string;
-  context?:
-    | WechatMiniprogram.Page.TrivialInstance
-    | WechatMiniprogram.Component.TrivialInstance;
+  context?: (() => DialogContext) | DialogContext;
   message?: string;
   overlay?: boolean;
   selector?: string;
   ariaLabel?: string;
+  /**
+   * @deprecated use custom-class instead
+   */
   className?: string;
   customStyle?: string;
   transition?: string;
@@ -22,7 +27,7 @@ interface DialogOptions {
    * @deprecated use beforeClose instead
    */
   asyncClose?: boolean;
-  beforeClose?: null | ((action: Action) => Promise<void> | void);
+  beforeClose?: null | ((action: Action) => Promise<void | boolean> | void);
   businessId?: number;
   sessionFrom?: string;
   overlayStyle?: string;
@@ -79,7 +84,10 @@ const Dialog = (options: DialogOptions) => {
 
   return new Promise<WechatMiniprogram.Component.TrivialInstance>(
     (resolve, reject) => {
-      const context = options.context || getContext();
+      const context =
+        (typeof options.context === 'function'
+          ? options.context()
+          : options.context) || getContext();
       const dialog = context.selectComponent(options.selector as string);
 
       delete options.context;

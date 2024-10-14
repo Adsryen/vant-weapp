@@ -5,6 +5,7 @@ export const button = Behavior({
 
   properties: {
     id: String,
+    buttonId: String,
     lang: String,
     businessId: Number,
     sessionFrom: String,
@@ -35,6 +36,10 @@ export const button = Behavior({
       this.triggerEvent('getphonenumber', event.detail);
     },
 
+    onGetRealTimePhoneNumber(event: WechatMiniprogram.ButtonGetPhoneNumber) {
+      this.triggerEvent('getrealtimephonenumber', event.detail);
+    },
+
     onError(event: WechatMiniprogram.ButtonError) {
       this.triggerEvent('error', event.detail);
     },
@@ -45,6 +50,18 @@ export const button = Behavior({
 
     onOpenSetting(event: WechatMiniprogram.ButtonOpenSetting) {
       this.triggerEvent('opensetting', event.detail);
+    },
+
+    onAgreePrivacyAuthorization(event) {
+      this.triggerEvent('agreeprivacyauthorization', event.detail);
+    },
+
+    onChooseAvatar(
+      event: WechatMiniprogram.CustomEvent<
+        WechatMiniprogram.GeneralCallbackResult & { avatarUrl: string }
+      >
+    ) {
+      this.triggerEvent('chooseavatar', event.detail);
     },
   },
 });

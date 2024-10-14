@@ -100,7 +100,7 @@
 | color | 通知文本颜色 | _string_ | `#ed6a0c` |
 | background | 滚动条背景 | _string_ | `#fffbe8` |
 | left-icon | 左侧[图标名称](#/icon)或图片链接 | _string_ | - |
-| delay | 动画延迟时间 (s) | _number_ | `1` |
+| delay | 动画延迟时间 (ms) | _number_ | `1` |
 | speed | 滚动速率 (px/s) | _number_ | `60` |
 | scrollable | 是否开启滚动播放，内容长度溢出时默认开启 | _boolean_ | - |
 | wrapable | 是否开启文本换行，只在禁用滚动时生效 | _boolean_ | `false` |
@@ -110,8 +110,8 @@
 
 | 事件名 | 说明             | 参数           |
 | ------ | ---------------- | -------------- |
-| click  | 点击通知栏时触发 | _event: Event_ |
-| close  | 关闭通知栏时触发 | _event: Event_ |
+| bind:click  | 点击通知栏时触发 | _event: Event_ |
+| bind:close  | 关闭通知栏时触发 | _event: Event_ |
 
 ### Slot
 
@@ -126,3 +126,19 @@
 | 类名         | 说明         |
 | ------------ | ------------ |
 | custom-class | 根节点样式类 |
+
+### 样式变量
+
+组件提供了下列 CSS 变量，可用于自定义样式，使用方法请参考 [ConfigProvider 组件](#/config-provider)。
+
+| 名称 | 默认值 | 描述 |
+| --- | --- | --- |
+| --notice-bar-height | _40px_ | - |
+| --notice-bar-padding | _0 var(--van-padding-md)_ | - |
+| --notice-bar-wrapable-padding | _var(--van-padding-xs) var(--van-padding-md)_ | - |
+| --notice-bar-text-color | _var(--van-orange-dark)_ | - |
+| --notice-bar-font-size | _var(--van-font-size-md)_ | - |
+| --notice-bar-line-height | _24px_ | - |
+| --notice-bar-background-color | _var(--van-orange-light)_ | - |
+| --notice-bar-icon-size | _16px_ | - |
+| --notice-bar-icon-min-width | _24px_ | - |

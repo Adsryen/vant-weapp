@@ -45,9 +45,7 @@ Sticky 组件与 CSS 中`position: sticky`属性实现的效果一致，当组�
 ```html
 <view id="container" style="height: 150px;">
   <van-sticky container="{{ container }}">
-    <van-button type="warning">
-      指定容器
-    </van-button>
+    <van-button type="warning">指定容器</van-button>
   </van-sticky>
 </view>
 ```
@@ -79,9 +77,7 @@ Page({
 >
   <view style="height: 400px; padding-top: 50px;">
     <van-sticky scroll-top="{{ scrollTop }}" offset-top="{{ offsetTop }}">
-      <van-button type="warning">
-        嵌套在 scroll-view 内
-      </van-button>
+      <van-button type="warning">嵌套在 scroll-view 内</van-button>
     </van-sticky>
   </view>
 </scroll-view>
@@ -123,4 +119,4 @@ Page({
 
 | 事件名 | 说明       | 回调参数                                       |
 | ------ | ---------- | ---------------------------------------------- |
-| scroll | 滚动时触发 | { scrollTop: 距离顶部位置, isFixed: 是否吸顶 } |
+| bind:scroll | 滚动时触发 | { scrollTop: 距离顶部位置, isFixed: 是否吸顶 } |

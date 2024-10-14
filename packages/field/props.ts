@@ -1,13 +1,5 @@
 export const commonProps: WechatMiniprogram.Component.PropertyOption = {
-  value: {
-    type: String,
-    observer(this: WechatMiniprogram.Component.TrivialInstance, value) {
-      if (value !== this.value) {
-        this.setData({ innerValue: value });
-        this.value = value;
-      }
-    },
-  },
+  value: String,
   placeholder: String,
   placeholderStyle: String,
   placeholderClass: String,
@@ -49,6 +41,7 @@ export const inputProps: WechatMiniprogram.Component.PropertyOption = {
   password: Boolean,
   confirmType: String,
   confirmHold: Boolean,
+  alwaysEmbed: Boolean,
 };
 
 export const textareaProps: WechatMiniprogram.Component.PropertyOption = {

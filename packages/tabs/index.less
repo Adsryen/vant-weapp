@@ -1,5 +1,4 @@
 @import '../common/style/var.less';
-@import '../common/style/theme.less';
 
 .van-tabs {
   position: relative;
@@ -29,7 +28,11 @@
   }
 
   &__scroll {
-    .theme(background-color, '@tabs-nav-background-color');
+    background-color: var(
+      --tabs-nav-background-color,
+      @tabs-nav-background-color
+    );
+    overflow: auto;
 
     &--line {
       box-sizing: content-box;
@@ -38,7 +41,12 @@
     }
 
     &--card {
-      .theme(margin, '0 @padding-md');
+      box-sizing: border-box;
+      margin: 0 var(--padding-md, @padding-md);
+      border: @border-width-base solid
+        var(--tabs-default-color, @tabs-default-color);
+      width: calc(100% - calc(var(--padding-md, @padding-md) * 2));
+      border-radius: @border-radius-sm;
     }
 
     &::-webkit-scrollbar {
@@ -53,26 +61,27 @@
 
     &--card {
       box-sizing: border-box;
-      .theme(height, '@tabs-card-height');
-      .theme(border, '@border-width-base solid @tabs-default-color');
-      .theme(border-radius, '@border-radius-sm');
+      height: var(--tabs-card-height, @tabs-card-height);
 
       .van-tab {
-        .theme(color, '@tabs-default-color');
-        .theme(line-height, 'calc(@tabs-card-height - 2 * @border-width-base)');
-        .theme(border-right, '@border-width-base solid @tabs-default-color');
+        color: var(--tabs-default-color, @tabs-default-color);
+        line-height: calc(
+          var(--tabs-card-height, @tabs-card-height) - 2 * @border-width-base
+        );
+        border-right: @border-width-base solid
+          var(--tabs-default-color, @tabs-default-color);
 
         &:last-child {
           border-right: none;
         }
 
         &.van-tab--active {
-          .theme(color, '@white');
-          .theme(background-color, '@tabs-default-color');
+          color: @white;
+          background-color: var(--tabs-default-color, @tabs-default-color);
         }
 
         &--disabled {
-          .theme(color, '@tab-disabled-text-color');
+          color: var(--tab-disabled-text-color, @tab-disabled-text-color);
         }
       }
     }
@@ -83,9 +92,10 @@
     bottom: 0;
     left: 0;
     z-index: 1;
-    .theme(height, '@tabs-bottom-bar-height');
-    .theme(border-radius, '@tabs-bottom-bar-height');
-    .theme(background-color, '@tabs-bottom-bar-color');
+    opacity: 0;
+    height: var(--tabs-bottom-bar-height, @tabs-bottom-bar-height);
+    border-radius: var(--tabs-bottom-bar-height, @tabs-bottom-bar-height);
+    background-color: var(--tabs-bottom-bar-color, @tabs-bottom-bar-color);
   }
 
   &__track {
@@ -104,15 +114,11 @@
   }
 
   &--line {
-    .van-tabs__wrap {
-      .theme(height, '@tabs-line-height');
-    }
+    height: var(--tabs-line-height, @tabs-line-height);
   }
 
   &--card {
-    .van-tabs__wrap {
-      .theme(height, '@tabs-card-height');
-    }
+    height: var(--tabs-card-height, @tabs-card-height);
   }
 }
 
@@ -124,24 +130,23 @@
   padding: 0 5px;
   text-align: center;
   cursor: pointer;
-  .theme(color, '@tab-text-color');
-  .theme(font-size, '@tab-font-size');
-  .theme(line-height, '@tabs-line-height');
+  color: var(--tab-text-color, @tab-text-color);
+  font-size: var(--tab-font-size, @tab-font-size);
+  line-height: var(--tabs-line-height, @tabs-line-height);
 
   &--active {
-    .theme(font-weight, '@font-weight-bold');
-    .theme(color, '@tab-active-text-color');
+    font-weight: var(--font-weight-bold, @font-weight-bold);
+    color: var(--tab-active-text-color, @tab-active-text-color);
   }
 
   &--disabled {
-    .theme(color, '@tab-disabled-text-color');
+    color: var(--tab-disabled-text-color, @tab-disabled-text-color);
   }
 
   &__title {
     &__info {
       position: relative !important;
       top: -1px !important;
-      display: inline-block;
       transform: translateX(0) !important;
     }
   }

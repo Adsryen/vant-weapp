@@ -25,36 +25,13 @@ npm i vant-weapp -S --production
 
 将 app.json 中的 `"style": "v2"` 去除，小程序的[新版基础组件](https://developers.weixin.qq.com/miniprogram/dev/reference/configuration/app.html#style)强行加上了许多样式，难以覆盖，不关闭将造成部分组件样式混乱。
 
-### 步骤三 修改 project.config.json
-
-开发者工具创建的项目，`miniprogramRoot` 默认为 `miniprogram`，`package.json` 在其外部，npm 构建无法正常工作。
-
-需要手动在 `project.config.json` 内添加如下配置，使开发者工具可以正确索引到 npm 依赖的位置。
-
-```json
-{
-  ...
-  "setting": {
-    ...
-    "packNpmManually": true,
-    "packNpmRelationList": [
-      {
-        "packageJsonPath": "./package.json",
-        "miniprogramNpmDistDir": "./miniprogram/"
-      }
-    ]
-  }
-}
-```
-注意： 由于目前新版开发者工具创建的小程序目录文件结构问题，npm构建的文件目录为miniprogram_npm，并且开发工具会默认在当前目录下创建miniprogram_npm的文件名，所以新版本的miniprogramNpmDistDir配置为'./'即可
-
-### 步骤四 构建 npm 包
+### 步骤三 构建 npm 包
 
 打开微信开发者工具，点击 **工具 -> 构建 npm**，并勾选 **使用 npm 模块** 选项，构建完成后，即可引入组件。
 
 <img style="width: 500px;" src="https://img.yzcdn.cn/public_files/2019/08/15/fa0549210055976cb63798503611ce3d.png" />
 
-### 步骤五 typescript 支持
+### 步骤四 typescript 支持
 
 如果你使用 typescript 开发小程序，还需要做如下操作，以获得顺畅的开发体验。
 
@@ -89,7 +66,7 @@ yarn add -D miniprogram-api-typings
 
 ### 示例工程
 
-我们提供了一个[示例工程](https://github.com/youzan/vant-demo)，示例工程会帮助你了解如下内容：
+我们提供了一个[示例工程](https://github.com/vant-ui/vant-demo)，示例工程会帮助你了解如下内容：
 
 - 基于 Vant Weapp 搭建小程序应用
 - 样式覆盖方案
@@ -152,3 +129,13 @@ npm run dev
 ```
 
 接着打开微信开发者工具，导入`example`目录的项目就可以预览示例了。
+
+### 关于用户隐私保护指引
+
+@vant/weapp 部分组件使用了微信提供的接口，其中部分接口涉及获取用户隐私信息。
+
+例如 `<Uploader />` 使用了微信提供的选择用户相册中图片接口`(wx.chooseImage)`。
+
+当小程序引入 @vant/weapp 并发布时，
+根据微信[《用户隐私保护指引填写说明》](https://developers.weixin.qq.com/miniprogram/dev/framework/user-privacy/)，
+如检测到代码中存在涉及用户隐私信息接口则需填写用户隐私保护指引信息，如已填写则无需重复填写。

@@ -1,4 +1,18 @@
-import { getSystemInfoSync } from './utils';
+interface WxWorkSystemInfo extends WechatMiniprogram.SystemInfo {
+  environment?: 'wxwork';
+}
+
+interface SystemInfo extends WxWorkSystemInfo, WechatMiniprogram.SystemInfo {}
+
+let systemInfo: SystemInfo;
+
+export function getSystemInfoSync() {
+  if (systemInfo == null) {
+    systemInfo = wx.getSystemInfoSync();
+  }
+
+  return systemInfo as SystemInfo;
+}
 
 function compareVersion(v1, v2) {
   v1 = v1.split('.');
@@ -50,7 +64,11 @@ export function canIUseGroupSetData() {
 }
 
 export function canIUseNextTick() {
-  return wx.canIUse('nextTick');
+  try {
+    return wx.canIUse('nextTick');
+  } catch (e) {
+    return gte('2.7.1');
+  }
 }
 
 export function canIUseCanvas2d() {

@@ -1,10 +1,13 @@
+const fs = require('fs');
 const gulp = require('gulp');
 const path = require('path');
 const less = require('gulp-less');
 const insert = require('gulp-insert');
 const rename = require('gulp-rename');
 const postcss = require('gulp-postcss');
+const ts = require('gulp-typescript');
 const util = require('util');
+const merge2 = require('merge2');
 const exec = util.promisify(require('child_process').exec);
 
 const src = path.resolve(__dirname, '../packages');
@@ -16,14 +19,20 @@ const exampleConfig = path.resolve(__dirname, '../tsconfig.example.json');
 
 const libDir = path.resolve(__dirname, '../lib');
 const esDir = path.resolve(__dirname, '../dist');
-const exampleDir = path.resolve(__dirname, '../example/dist');
+const exampleDistDir = path.resolve(__dirname, '../example/dist');
+const examplePagesDir = path.resolve(__dirname, '../example/pages');
 
+const exampleAppJsonPath = path.resolve(__dirname, '../example/app.json');
 const baseCssPath = path.resolve(__dirname, '../packages/common/index.wxss');
 
 const lessCompiler = (dist) =>
   function compileLess() {
+    const srcPath = [`${src}/**/*.less`];
+    if ([esDir, libDir].indexOf(dist) !== -1) {
+      srcPath.push(`!${src}/**/demo/**/*.less`);
+    }
     return gulp
-      .src(`${src}/**/*.less`)
+      .src(srcPath)
       .pipe(less())
       .pipe(postcss())
       .pipe(
@@ -45,14 +54,51 @@ const lessCompiler = (dist) =>
   };
 
 const tsCompiler = (dist, config) =>
-  async function compileTs() {
-    await exec(`npx tsc -p ${config}`);
-    await exec(`npx tscpaths -p ${config} -s ../packages -o ${dist}`);
+  function compileTs() {
+    const tsProject = ts.createProject(config, {
+      declaration: true,
+    });
+    const tsResult = tsProject.src().pipe(tsProject());
+
+    return merge2(
+      tsResult.js
+        .pipe(
+          insert.transform((contents, file) => {
+            if (dist === exampleDistDir && file.path.includes(`${path.sep}demo${path.sep}`)) {
+              const iconConfig = '@vant/icons/src/config';
+              contents = contents.replace(
+                iconConfig,
+                path.relative(
+                  path.dirname(file.path),
+                  `${exampleDistDir}/${iconConfig}`
+                ).replace(/\\/g, '/')
+              );
+            }
+            return contents;
+          })
+        )
+        .pipe(gulp.dest(dist)),
+      tsResult.dts.pipe(gulp.dest(dist))
+    );
   };
 
 const copier = (dist, ext) =>
   function copy() {
-    return gulp.src(`${src}/**/*.${ext}`).pipe(gulp.dest(dist));
+    const srcPath = [`${src}/**/*.${ext}`];
+    if ([esDir, libDir].indexOf(dist) !== -1) {
+      srcPath.push(`!${src}/**/demo/**/*.${ext}`);
+    }
+    return gulp
+      .src(srcPath)
+      .pipe(
+        insert.transform((contents, file) => {
+          if (ext === 'json' &&  file.path.includes(`${path.sep}demo${path.sep}`)  ) {
+            contents = contents.replace('/example', '');
+          }
+          return contents;
+        })
+      )
+      .pipe(gulp.dest(dist));
   };
 
 const staticCopier = (dist) =>
@@ -83,18 +129,51 @@ const tasks = [
 }, {});
 
 tasks.buildExample = gulp.series(
-  cleaner(exampleDir),
+  cleaner(exampleDistDir),
   gulp.parallel(
-    tsCompiler(exampleDir, exampleConfig),
-    lessCompiler(exampleDir),
-    staticCopier(exampleDir),
+    tsCompiler(exampleDistDir, exampleConfig),
+    lessCompiler(exampleDistDir),
+    staticCopier(exampleDistDir),
     () =>
-      gulp.src(`${icons}/**/*`).pipe(gulp.dest(`${exampleDir}/@vant/icons`)),
+      gulp
+        .src(`${icons}/**/*`)
+        .pipe(gulp.dest(`${exampleDistDir}/@vant/icons`)),
     () => {
-      gulp.watch(`${src}/**/*.less`, lessCompiler(exampleDir));
-      gulp.watch(`${src}/**/*.wxml`, copier(exampleDir, 'wxml'));
-      gulp.watch(`${src}/**/*.wxs`, copier(exampleDir, 'wxs'));
-      gulp.watch(`${src}/**/*.json`, copier(exampleDir, 'json'));
+      const appJson = JSON.parse(fs.readFileSync(exampleAppJsonPath));
+      const excludePages = ['pages/dashboard/index'];
+      appJson.pages
+        .filter((page) => page.indexOf(excludePages) === -1)
+        .forEach((path) => {
+          const component = path.replace(/(pages\/|\/index)/g, '');
+          const writeFiles = [
+            {
+              path: `${examplePagesDir}/${component}/index.js`,
+              contents: "import Page from '../../common/page';\n\nPage();",
+            },
+            {
+              path: `${examplePagesDir}/${component}/index.wxml`,
+              contents: `<van-${component}-demo />`,
+            },
+          ];
+          writeFiles.forEach((writeFile) => {
+            fs.access(writeFile.path, fs.constants.F_OK, (fileNotExists) => {
+              if (fileNotExists) {
+                fs.writeFile(writeFile.path, writeFile.contents, (err) => {
+                  if (err) {
+                    throw err;
+                  }
+                });
+              }
+            });
+          });
+        });
+    },
+    () => {
+      gulp.watch(`${src}/**/*.less`, lessCompiler(exampleDistDir));
+      gulp.watch(`${src}/**/*.wxml`, copier(exampleDistDir, 'wxml'));
+      gulp.watch(`${src}/**/*.wxs`, copier(exampleDistDir, 'wxs'));
+      gulp.watch(`${src}/**/*.ts`, tsCompiler(exampleDistDir, exampleConfig));
+      gulp.watch(`${src}/**/*.json`, copier(exampleDistDir, 'json'));
     }
   )
 );

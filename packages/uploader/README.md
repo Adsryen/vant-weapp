@@ -190,7 +190,7 @@ Page({
 
 ```js
 // 上传图片
-uploadToCloud() { 
+uploadToCloud() {
   wx.cloud.init();
   const { fileList } = this.data;
   if (!fileList.length) {
@@ -200,7 +200,7 @@ uploadToCloud() {
     Promise.all(uploadTasks)
       .then(data => {
         wx.showToast({ title: '上传成功', icon: 'none' });
-        const newFileList = data.map(item => { url: item.fileID });
+        const newFileList = data.map(item => ({ url: item.fileID }));
         this.setData({ cloudPath: data, fileList: newFileList });
       })
       .catch(e => {
@@ -226,24 +226,30 @@ uploadFilePromise(fileName, chooseResult) {
 | --- | --- | --- | --- |
 | name | 标识符，可以在回调函数的第二项参数中获取 | _string \| number_ | - |
 | accept | 接受的文件类型, 可选值为`all` `media` `image` `file` `video` | _string_ | `image` |
-| sizeType | 所选的图片的尺寸, 当`accept`为`image`类型时设置所选图片的尺寸可选值为`original` `compressed` | _string[]_ | `['original','compressed']` |
+| sizeType | 所选的图片的尺寸, 当`accept`为`image` \| `media` 类型时设置所选图片的尺寸可选值为`original` `compressed` | _string[]_ | `['original','compressed']` |
 | preview-size | 预览图和上传区域的尺寸，默认单位为`px` | _string \| number_ | `80px` |
 | preview-image | 是否在上传完成后展示预览图 | _boolean_ | `true` |
 | preview-full-image | 是否在点击预览图后展示全屏图片预览 | _boolean_ | `true` |
+| preview-file `v1.11.7` | 是否在点击文件预览图后预览文件 | _boolean_ | `true` |
 | multiple | 是否开启图片多选，部分安卓机型不支持 | _boolean_ | `false` |
 | disabled | 是否禁用文件上传 | _boolean_ | `false` |
 | show-upload | 是否展示文件上传按钮 | _boolean_ | `true` |
 | deletable | 是否展示删除按钮 | _boolean_ | `true` |
-| capture | 图片或者视频选取模式，当`accept`为`image`类型时设置`capture`可选值为`camera`可以直接调起摄像头 | _string \| string[]_ | `['album', 'camera']` |
+| capture | 图片或者视频选取模式，当`accept`为`image` \| `media` 类型时设置`capture`可选值为`camera`可以直接调起摄像头 | _string[]_ | `['album', 'camera']` |
 | max-size | 文件大小限制，单位为`byte` | _number_ | - |
 | max-count | 文件上传数量限制 | _number_ | - |
 | upload-text | 上传区域文字提示 | _string_ | - |
+| video-fit `1.10.21` | video 封面的预览图模式，可选值参考小程序`video`组件的`object-fit`属性 | _string_ | `contain` |
 | image-fit | 预览图裁剪模式，可选值参考小程序`image`组件的`mode`属性 | _string_ | `scaleToFill` |
 | use-before-read | 是否开启文件读取前事件 | _boolean_ | - |
-| camera | 当 accept 为 `video` 时生效，可选值为 `back` `front` | _string_ | - |
+| camera | 当 accept 为 `video` \| `media` 时生效，可选值为 `back` `front` | _string_ | - |
 | compressed | 当 accept 为 `video` 时生效，是否压缩视频，默认为`true` | _boolean_ | - |
-| max-duration | 当 accept 为 `video` 时生效，拍摄视频最长拍摄时间，单位秒 | _number_ | - |
+| max-duration | 当 accept 为 `video` \| `media` 时生效，拍摄视频最长拍摄时间，单位秒 | _number_ | `60` |
+| media-type `v1.10.8` | 当 accept 为 `media` 时生效，选择的文件的文件类型，可选值为 `image` `video` `mix` | _string[]_ | `['image', 'video', 'mix']` |
+| extension `v1.10.11` | 当 accept 为 `file` 时生效，根据文件拓展名过滤可选择文件。每一项都不能是空字符串。默认不过滤 | _string[] \| undefined_ | - |
+| showmenu `v1.10.13` | 预览图片时，是否显示长按菜单 | _boolean_ | `true` |
 | upload-icon | 上传区域图标，可选值见 [Icon 组件](#/icon) | _string_ | `plus` |
+| referrer-policy `v1.11.6` | 当 accept 为 video 时生效，具体用法参考 [微信官方 - 媒体组件 / video](https://developers.weixin.qq.com/miniprogram/dev/component/video.html) | string | `no-referrer` |
 
 #### accept 的合法值
 
@@ -259,14 +265,14 @@ uploadFilePromise(fileName, chooseResult) {
 
 `file-list` 为一个对象数组，数组中的每一个对象包含以下 `key`。
 
-| 参数      | 说明                                                   |
-| --------- | ------------------------------------------------------ |
-| `url`     | 图片和视频的网络资源地址                               |
-| `name`    | 文件名称，视频将在全屏预览时作为标题显示               |
-| `thumb`   | 图片缩略图或视频封面的网络资源地址，仅对图片和视频有效 |
-| `type`    | 文件类型，可选值`image` `video` `file`                 |
-| `isImage` | 手动标记图片资源                                       |
-| `isVideo` | 手动标记视频资源                                       |
+| 参数 | 说明 |
+| --- | --- |
+| `url` | 图片和视频的网络资源地址 |
+| `name` | 文件名称，视频将在全屏预览时作为标题显示 |
+| `thumb` | 图片缩略图或视频封面的网络资源地址，仅对图片和视频有效，`accept` 为 `video`时，真机不会返回该属性，建议使用 `media` 和 `media-type` 配合完成视频上传 |
+| `type` | 文件类型，可选值`image` `video` `file` |
+| `isImage` | 手动标记图片资源 |
+| `isVideo` | 手动标记视频资源 |
 
 ### Slot
 
@@ -274,7 +280,7 @@ uploadFilePromise(fileName, chooseResult) {
 | ---- | -------------- |
 | -    | 自定义上传区域 |
 
-### Event
+### Events
 
 | 事件名 | 说明 | 回调参数 |
 | --- | --- | --- |

@@ -123,7 +123,7 @@
 // Calendar
 @calendar-height: 100%;
 @calendar-background-color: @white;
-@calendar-popup-height: 80%;
+@calendar-popup-height: 90%;
 @calendar-header-box-shadow: 0 2px 10px rgba(125, 126, 128, 0.16);
 @calendar-header-title-height: 44px;
 @calendar-header-title-font-size: @font-size-lg;
@@ -193,6 +193,9 @@
 @cell-group-title-padding: @padding-md @padding-md @padding-xs;
 @cell-group-title-font-size: @font-size-md;
 @cell-group-title-line-height: 16px;
+@cell-group-inset-padding: 0 @padding-md;
+@cell-group-inset-border-radius: @border-radius-lg;
+@cell-group-inset-title-padding: @padding-md @padding-md @padding-xs @padding-xl;
 
 // Checkbox
 @checkbox-size: 20px;
@@ -642,9 +645,10 @@
 @dropdown-menu-title-text-color: @text-color;
 @dropdown-menu-title-active-text-color: @red;
 @dropdown-menu-title-disabled-text-color: @gray-6;
-@dropdown-menu-title-padding: 0 @padding-xs;
+@dropdown-menu-title-padding: 0 @padding-lg 0 @padding-xs;
 @dropdown-menu-title-line-height: 18px;
 @dropdown-menu-option-active-color: @red;
+@dropdown-menu-box-shadow: 0 2px 12px fade(@gray-7, 12);
 
 // IndexAnchor
 @index-anchor-padding: 0 @padding-md;
@@ -667,3 +671,18 @@
 @skeleton-row-margin-top: @padding-sm;
 @skeleton-avatar-background-color: @gray-2;
 @skeleton-animation-duration: 1.2s;
+
+// Cascader
+@cascader-header-height: 48px;
+@cascader-header-padding: 0 16px;
+@cascader-title-font-size: 16px;
+@cascader-title-line-height: 20px;
+@cascader-close-icon-size: 22px;
+@cascader-close-icon-color: #c8c9cc;
+@cascader-selected-icon-size: 18px;
+@cascader-tabs-height: 48px;
+@cascader-active-color: @blue;
+@cascader-options-height: 384px;
+@cascader-option-disabled-color: #c8c9cc;
+@cascader-tab-color: #323233;
+@cascader-unselected-tab-color: #969799;

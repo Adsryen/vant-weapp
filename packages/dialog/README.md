@@ -25,7 +25,7 @@
 ```
 
 ```javascript
-import Dialog from 'path/to/@vant/weapp/dist/dialog/dialog';
+import Dialog from '@vant/weapp/dialog/dialog';
 
 Dialog.alert({
   title: '标题',
@@ -50,7 +50,7 @@ Dialog.alert({
 ```
 
 ```javascript
-import Dialog from 'path/to/@vant/weapp/dist/dialog/dialog';
+import Dialog from '@vant/weapp/dialog/dialog';
 
 Dialog.confirm({
   title: '标题',
@@ -73,7 +73,7 @@ Dialog.confirm({
 ```
 
 ```javascript
-import Dialog from 'path/to/@vant/weapp/dist/dialog/dialog';
+import Dialog from '@vant/weapp/dialog/dialog';
 
 Dialog.alert({
   title: '标题',
@@ -100,23 +100,24 @@ Dialog.alert({
 ```
 
 ```javascript
-import Dialog from 'path/to/@vant/weapp/dist/dialog/dialog';
+import Dialog from '@vant/weapp/dialog/dialog';
 
-const beforeClose = (action) => new Promise((resolve) => {
-  setTimeout(() => {
-    if (action === 'confirm') {
-      resolve(true);
-    } else {
-      // 拦截取消操作
-      resolve(false);
-    }
-  }, 1000);
-});
+const beforeClose = (action) =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      if (action === 'confirm') {
+        resolve(true);
+      } else {
+        // 拦截取消操作
+        resolve(false);
+      }
+    }, 1000);
+  });
 
 Dialog.confirm({
   title: '标题',
-  message: '弹窗内容'
-  beforeClose
+  message: '弹窗内容',
+  beforeClose,
 });
 ```
 
@@ -154,6 +155,27 @@ Page({
 });
 ```
 
+### 自定义样式
+
+如果需要自定义样式，建议使用 `custom-class` 实现，不在推荐 `className` 属性（在自定义组件中使用并不会生效），使用方法如下
+
+#### 组件调用
+
+```html
+<van-dialog
+  title="标题"
+  message="弹窗内容"
+  show="{{ show }}"
+  custom-class="my-custom-class"
+/>
+```
+
+#### API 调用
+
+```html
+<van-dialog id="van-dialog" custom-class="my-custom-class" />
+```
+
 ## API
 
 ### 方法
@@ -180,7 +202,7 @@ Page({
 | messageAlign | 内容对齐方式，可选值为`left` `right` | _string_ | `center` |
 | theme | 样式风格，可选值为`round-button` | _string_ | `default` |
 | zIndex | z-index 层级 | _number_ | `100` |
-| className | 自定义类名，dialog 在自定义组件内时无效 | _string_ | '' |
+| className | 自定义类名，dialog 在自定义组件内时无效，已废弃，请使用 `custom-class` 代替，将在 2.0.0 移除 | _string_ | '' |
 | customStyle | 自定义样式 | _string_ | '' |
 | selector | 自定义选择器 | _string_ | `van-dialog` |
 | showConfirmButton | 是否展示确认按钮 | _boolean_ | `true` |
@@ -191,7 +213,7 @@ Page({
 | overlayStyle | 自定义遮罩层样式 | _object_ | - |
 | closeOnClickOverlay | 点击遮罩层时是否关闭弹窗 | _boolean_ | `false` |
 | asyncClose | 已废弃，将在 2.0.0 移除，请使用 `beforeClose` 属性代替 | _boolean_ | `false` |
-| beforeClose | 关闭前的回调函数，返回 `false` 可阻止关闭，支持返回 Promise | _(action) => boolean \| Promise<boolean>_ | - |
+| beforeClose | 关闭前的回调函数，返回 `false` 可阻止关闭，支持返回 Promise | _(action) => boolean \| Promise\<boolean\>_ | - |
 | context | 选择器的选择范围，可以传入自定义组件的 this 作为上下文 | _object_ | 当前页面 |
 | transition | 动画名称，可选值为`fade` `none` | _string_ | `scale` |
 | confirmButtonOpenType | 确认按钮的微信开放能力，具体支持可参考 [微信官方文档](https://developers.weixin.qq.com/miniprogram/dev/component/button.html) | _string_ | - |
@@ -218,13 +240,14 @@ Page({
 | 参数 | 说明 | 类型 | 默认值 |
 | --- | --- | --- | --- |
 | show | 是否显示弹窗 | _boolean_ | - |
+| confirm-button-id `v1.10.25`| 确认按钮的标识符，作为底层原生button组件的id值 | _string_ | - |
 | title | 标题 | _string_ | - |
 | width | 弹窗宽度，默认单位为`px` | _string \| number_ | `320px` |
 | message | 文本内容，支持通过`\n`换行 | _string_ | - |
 | theme | 样式风格，可选值为`round-button` | _string_ | `default` |
 | message-align | 内容对齐方式，可选值为`left` `right` | _string_ | `center` |
 | z-index | z-index 层级 | _number_ | `100` |
-| class-name | 自定义类名，dialog 在自定义组件内时无效 | _string_ | '' |
+| class-name | 自定义类名，dialog 在自定义组件内时无效，已废弃，请使用 `custom-class` 代替，将在 2.0.0 移除 | _string_ | '' |
 | custom-style | 自定义样式 | _string_ | '' |
 | show-confirm-button | 是否展示确认按钮 | _boolean_ | `true` |
 | show-cancel-button | 是否展示取消按钮 | _boolean_ | `false` |
@@ -233,14 +256,17 @@ Page({
 | confirm-button-color | 确认按钮的字体颜色 | _string_ | `#ee0a24` |
 | cancel-button-color | 取消按钮的字体颜色 | _string_ | `#333` |
 | overlay | 是否展示遮罩层 | _boolean_ | `true` |
-| overlay-style | 自定义遮罩层样式 | _object_ | - | 1.0.0 |
+| overlay-style `v1.0.0` | 自定义遮罩层样式 | _object_ | - |
 | close-on-click-overlay | 点击遮罩层时是否关闭弹窗 | _boolean_ | `false` |
 | use-slot | 是否使用自定义内容的插槽 | _boolean_ | `false` |
 | use-title-slot | 是否使用自定义标题的插槽 | _boolean_ | `false` |
+| use-confirm-button-slot `1.10.23` | 是否使用自定义确认按钮的插槽 | _boolean_ | `false` |
+| use-cancel-button-slot `1.10.23` | 是否使用自定义取消按钮的插槽 | _boolean_ | `false` |
 | async-close | 已废弃，将在 2.0.0 移除，请使用 `beforeClose` 属性代替 | _boolean_ | `false` |
-| before-close | 关闭前的回调函数，返回 `false` 可阻止关闭，支持返回 Promise | _(action) => boolean \| Promise<boolean>_ | - |
+| before-close | 关闭前的回调函数，返回 `false` 可阻止关闭，支持返回 Promise | _(action) => boolean \| Promise\<boolean\>_ | - |
 | transition | 动画名称，可选值为`fade` | _string_ | `scale` |
 | confirm-button-open-type | 确认按钮的微信开放能力，具体支持可参考 [微信官方文档](https://developers.weixin.qq.com/miniprogram/dev/component/button.html) | _string_ | - |
+| root-portal `v1.11.3` | 是否从页面子树中脱离出来，用于解决各种 fixed 失效问题，微信基础库 >= `2.25.2 `  | _boolean_ | `false` |
 
 ### OpenType Props
 
@@ -267,11 +293,23 @@ Page({
 | bind:getuserinfo | 点击确认按钮时，会返回获取到的用户信息，<br>从返回参数的 detail 中获取到的值同 wx.getUserInfo | - |
 | bind:contact | 客服消息回调 | - |
 | bind:getphonenumber | 获取用户手机号回调 | - |
+| bind:getrealtimephonenumber `v1.10.21` | 获取手机号实时验证回调，open-type=getRealtimePhoneNumber 时有效 | - |
+| bind:agreeprivacyauthorization `v1.10.25` | 同意隐私协议回调，openType="agreePrivacyAuthorization"时有效 | - |
 | bind:error | 当使用开放能力时，发生错误的回调 | - |
 | bind:opensetting | 在打开授权设置页后回调 | - |
 
 ### Slot
 
-| 名称  | 说明                                                 |
-| ----- | ---------------------------------------------------- |
+| 名称 | 说明 |
+| --- | --- |
 | title | 自定义`title`显示内容，如果设置了`title`属性则不生效 |
+| confirm-button `1.10.23` | 自定义`confirm-button`显示内容，需要 `use-confirm-button-slot` 为 `true` |
+| cancel-button `1.10.23` | 自定义`cancel-button`显示内容，需要 `use-cancel-button-slot` 为 `true` |
+
+### 外部样式类
+
+| 类名                            | 说明           |
+| ------------------------------- | -------------- |
+| custom-class `v1.10.8`          | 根节点样式类   |
+| cancle-button-class `v1.10.21`  | 取消按钮样式类 |
+| confirm-button-class `v1.10.21` | 确认按钮样式类 |

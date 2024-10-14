@@ -4,10 +4,11 @@
 .idea
 .vscode
 node_modules
-site
+site-dist
 docs/dist
 example/dist
 .history
 changelog.generated.md
 package-lock.json
 build/private.wx1c01b35002d3ba14.key
+project.private.config.json

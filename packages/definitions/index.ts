@@ -7,6 +7,7 @@ interface VantComponentInstance {
     detail?: unknown,
     options?: WechatMiniprogram.Component.TriggerEventOption
   ) => void;
+  setView: (value: Record<string, any>, callback?: () => void) => void;
 }
 
 export type VantComponentOptions<
@@ -23,6 +24,8 @@ export type VantComponentOptions<
     relations: Record<string, WechatMiniprogram.Component.RelationOption>;
     mixin: string;
   };
+
+  watch?: Record<string, (...args: any[]) => any>;
 
   methods?: Methods;
 
